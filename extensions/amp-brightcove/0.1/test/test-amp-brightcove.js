@@ -22,10 +22,13 @@ adopt(window);
 
 describe('amp-brightcove', () => {
 
-  function getBrightcove(accountId, videoId, opt_responsive) {
+  function getBrightcove(accountId, videoId, opt_responsive, playerId) {
     return createIframePromise().then(iframe => {
       const bc = iframe.doc.createElement('amp-brightcove');
       bc.setAttribute('data-account', accountId);
+      if (playerId) {
+        bc.setAttribute('data-player', playerId);
+      }
       bc.setAttribute('width', '111');
       bc.setAttribute('height', '222');
       if (videoId) {
@@ -63,5 +66,14 @@ describe('amp-brightcove', () => {
   it('requires data-account', () => {
     return getBrightcove('').should.eventually.be.rejectedWith(
         /The data-account attribute is required for/);
+  });
+
+  it('uses player specified by data-player attribute', () => {
+    return getBrightcove('906043040001', 'ref:ampdemo', false, 'abcdef')
+      .then(bc => {
+        const iframe = bc.querySelector('iframe');
+        expect(iframe.src).to.equal(
+            'https://players.brightcove.net/906043040001/abcdef_default/index.html?videoId=ref:ampdemo');
+      });
   });
 });
